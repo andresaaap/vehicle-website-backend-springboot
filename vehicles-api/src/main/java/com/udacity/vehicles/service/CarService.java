@@ -1,8 +1,13 @@
 package com.udacity.vehicles.service;
 
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
+import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,12 +20,20 @@ public class CarService {
 
     private final CarRepository repository;
 
-    public CarService(CarRepository repository) {
+    // car pricing client
+    private final PriceClient pClient;
+
+    // car maps client
+    private final MapsClient mClient;
+
+    public CarService(CarRepository repository, PriceClient pClient, MapsClient mClient) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
          */
         this.repository = repository;
+        this.pClient = pClient;
+        this.mClient = mClient;
     }
 
     /**
@@ -42,7 +55,13 @@ public class CarService {
          *   If it does not exist, throw a CarNotFoundException
          *   Remove the below code as part of your implementation.
          */
-        Car car = new Car();
+        Optional<Car> car = repository.findById(id);
+
+        if (car.isEmpty()){
+            throw new CarNotFoundException();
+        }
+
+        Car requestedCar = car.get();
 
         /**
          * TODO: Use the Pricing Web client you create in `VehiclesApiApplication`
@@ -52,6 +71,12 @@ public class CarService {
          *   the pricing service each time to get the price.
          */
 
+        String carPrice = pClient.getPrice(requestedCar.getId());
+
+        // Print the price to the console
+        System.out.println("Car price: " + carPrice);
+
+        requestedCar.setPrice(carPrice);
 
         /**
          * TODO: Use the Maps Web client you create in `VehiclesApiApplication`
@@ -61,9 +86,10 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
+        Location carCompleteLocation = mClient.getAddress(requestedCar.getLocation());
+        requestedCar.setLocation(carCompleteLocation);
 
-
-        return car;
+        return requestedCar;
     }
 
     /**
