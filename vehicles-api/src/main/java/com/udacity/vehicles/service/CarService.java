@@ -49,7 +49,7 @@ public class CarService {
      * @param id the ID number of the car to gather information on
      * @return the requested car's information, including location and price
      */
-    public Car findById(Long id) {
+    public Car findById(Long id) throws CarNotFoundException {
         /**
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
@@ -114,17 +114,24 @@ public class CarService {
      * Deletes a given car by ID
      * @param id the ID number of the car to delete
      */
-    public void delete(Long id) {
+    public void delete(Long id) throws CarNotFoundException {
         /**
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
+        Optional<Car> car = repository.findById(id);
 
+        if (car.isEmpty()){
+            throw new CarNotFoundException();
+        }
+
+        Car requestedCar = car.get();
 
         /**
          * TODO: Delete the car from the repository.
          */
 
+        repository.delete(requestedCar);
 
     }
 }

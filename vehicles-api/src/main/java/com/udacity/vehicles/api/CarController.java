@@ -99,7 +99,21 @@ class CarController {
          * TODO: Use the `assembler` on that updated car and return as part of the response.
          *   Update the first line as part of the above implementing.
          */
-        Resource<Car> resource = assembler.toResource(new Car());
+        Car requestCar;
+        try {
+            requestCar = carService.findById(id);
+        }
+        catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+
+        // Use car to update the requestCar
+        requestCar.setDetails(car.getDetails());
+        requestCar.setLocation(car.getLocation());
+        requestCar.setCondition(car.getCondition());
+        requestCar.setModifiedAt(car.getModifiedAt());
+
+        Resource<Car> resource = assembler.toResource(carService.save(requestCar));
         return ResponseEntity.ok(resource);
     }
 
@@ -113,6 +127,14 @@ class CarController {
         /**
          * TODO: Use the Car Service to delete the requested vehicle.
          */
+        try {
+            Car requestCar = carService.findById(id);
+        }
+        catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+        carService.delete(id);
+
         return ResponseEntity.noContent().build();
     }
 }
