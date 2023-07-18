@@ -4,9 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -141,6 +139,26 @@ public class CarControllerTest {
                 .andExpect(status().is2xxSuccessful());
     }
 
+    @Test
+    public void updateCar() throws Exception {
+        /**
+         * TODO: Add a test to check whether a vehicle is appropriately deleted
+         *   when the `delete` method is called from the Car Controller. This
+         *   should utilize the car from `getCar()` below.
+         */
+        Car updatedCar = getUpdatedCar();
+
+        mvc.perform(put(new URI("/cars"+"/"+1 ))
+                                .content(json.write(updatedCar).getJson())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.details.externalColor").value("red"))
+                .andExpect(jsonPath("$.condition").value("NEW"));
+    }
+
+
+
     /**
      * Creates an example Car object for use in testing.
      * @return an example Car object
@@ -162,6 +180,26 @@ public class CarControllerTest {
         details.setNumberOfDoors(4);
         car.setDetails(details);
         car.setCondition(Condition.USED);
+        return car;
+    }
+
+    private Car getUpdatedCar() {
+        Car car = new Car();
+        car.setLocation(new Location(40.730610, -73.935242));
+        Details details = new Details();
+        Manufacturer manufacturer = new Manufacturer(101, "Chevrolet");
+        details.setManufacturer(manufacturer);
+        details.setModel("Impala");
+        details.setMileage(32280);
+        details.setExternalColor("red");
+        details.setBody("sedan");
+        details.setEngine("3.6L V6");
+        details.setFuelType("Gasoline");
+        details.setModelYear(2018);
+        details.setProductionYear(2018);
+        details.setNumberOfDoors(4);
+        car.setDetails(details);
+        car.setCondition(Condition.NEW);
         return car;
     }
 }
